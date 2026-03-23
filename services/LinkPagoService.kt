@@ -1,0 +1,30 @@
+package com.Ahorra.qsalud.services
+
+import com.Ahorra.qsalud.models.pagos.ConsulDomRequest
+import com.Ahorra.qsalud.models.pagos.GenLinkRequest
+import org.springframework.stereotype.Service
+import org.springframework.web.reactive.function.client.WebClient
+import reactor.core.publisher.Mono
+
+@Service
+class LinkPagoService(
+    private val linkPagoWebClient: WebClient
+) {
+    fun generarLink(request: GenLinkRequest, token: String): Mono<String> {
+        return linkPagoWebClient.post()
+            .uri("/metodo/genLink") // Ajustado a la ruta del método [cite: 27, 136]
+            .headers { it.setBearerAuth(token) } [cite: 81]
+        .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+
+    fun consultarDomiciliacion(request: ConsulDomRequest, token: String): Mono<String> {
+        return linkPagoWebClient.post()
+            .uri("/consulDom") [cite: 396]
+        .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+}

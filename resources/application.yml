@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ws-qsalud-api
+
+# Configuraciones de WebClient y Logs
+logging:
+  level:
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG # Útil para ver las llamadas HTTP en consola
