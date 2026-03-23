@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono
 class DocumentosService(
     private val siseWebClient: WebClient
 ) {
-    // Generar formato de impresión (Cotización, Emisión o Solicitud) [cite: 748, 781, 812]
+    // Generar formato de impresión (Cotización, Emisión o Solicitud)
     fun descargarFormato(request: FormatPrintingRequest, token: String): Mono<FormatPrintingResponse> {
         return siseWebClient.post()
             .uri("/api/printing/format-printing") [cite: 748, 781, 812]
@@ -23,10 +23,29 @@ class DocumentosService(
             .bodyToMono(FormatPrintingResponse::class.java)
     }
 
-    // Solicitar OTP [cite: 1016]
+    // Solicitar OTP
     fun solicitarToken(request: TokenRequest, token: String): Mono<String> {
         return siseWebClient.post()
             .uri("/api/brokers/application_getToken") [cite: 1016]
+        .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+    fun descargarSolicitudFirmada(solicitud: String, token: String): Mono<String> {
+        val request = mapOf("solicitud" to solicitud) [cite: 973]
+        return siseWebClient.post()
+            .uri("/api/brokers/get-siggned-application") [cite: 968]
+        .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+
+    // Verificar CFDI
+    fun verificarCfdi(request: CfdiRequest, token: String): Mono<String> {
+        return siseWebClient.post()
+            .uri("/api/brokers/verify-cfdi") [cite: 980]
         .headers { it.setBearerAuth(token) }
             .bodyValue(request)
             .retrieve()
