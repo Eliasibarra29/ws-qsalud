@@ -27,6 +27,35 @@ class CatalogosService(
             .bodyToFlux(PreguntaCatalogo::class.java)
     }
 
+
+    fun getPreguntaCuestionarioPorId(id: Int, token: String): Mono<PreguntaCatalogo> {
+        return siseWebClient.get()
+            .uri("/api/catalogs/typeQuestion/{id}/", id)
+            .headers { it.setBearerAuth(token) }
+            .retrieve().bodyToMono(PreguntaCatalogo::class.java)
+    }
+
+    fun getRegimenFiscal(token: String): Mono<String> {
+        return siseWebClient.get()
+            .uri("/api/catalogs/reg_fiscal")
+            .headers { it.setBearerAuth(token) }
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+    fun getParentesco(token: String): Mono<String> {
+        return siseWebClient.get()
+            .uri("/api/catalogs/parentesco")
+            .headers { it.setBearerAuth(token) }
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+    fun getParentescoBeneficiario(token: String): Mono<String> {
+        return siseWebClient.get()
+            .uri("/api/catalogs/parentesco_beneficiario")
+            .headers { it.setBearerAuth(token) }
+            .retrieve().bodyToMono(String::class.java)
+    }
+
     fun getOcupaciones(token: String): Mono<String> {
         return siseWebClient.get()
             .uri("/api/catalogs/ocupacion") [cite: 626-627]

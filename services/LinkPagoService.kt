@@ -19,6 +19,32 @@ class LinkPagoService(
             .bodyToMono(String::class.java)
     }
 
+
+    fun validaBin(request: ValidaBinRequest, token: String): Mono<String> {
+        return linkPagoWebClient.post().uri("/validaBin")
+            .headers { it.setBearerAuth(token) }.bodyValue(request)
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+    fun searchReceipts(request: PolizaRequest, token: String): Mono<String> {
+        return linkPagoWebClient.post().uri("/searchReceipts")
+            .headers { it.setBearerAuth(token) }.bodyValue(request)
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+    fun searchLink(request: PolizaRequest, token: String): Mono<String> {
+        return linkPagoWebClient.post().uri("/searchlink")
+            .headers { it.setBearerAuth(token) }.bodyValue(request)
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+    fun cancelLink(request: CancelLinkRequest, token: String): Mono<String> {
+        return linkPagoWebClient.post().uri("/cancelLink")
+            .headers { it.setBearerAuth(token) }.bodyValue(request)
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+
     fun consultarDomiciliacion(request: ConsulDomRequest, token: String): Mono<String> {
         return linkPagoWebClient.post()
             .uri("/consulDom") [cite: 396]

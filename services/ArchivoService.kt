@@ -27,6 +27,22 @@ class ArchivosService(
             .bodyToMono(String::class.java)
     }
 
+    // Validación de Identidad con Video
+    fun validarVideo(imageFront: Resource, imageBack: Resource, video: Resource, token: String): Mono<String> {
+        val builder = MultipartBodyBuilder()
+        builder.part("image_front", imageFront)
+        builder.part("image_back", imageBack)
+        builder.part("video", video)
+
+        return siseWebClient.post()
+            .uri("/api/brokers/upload-video")
+            .headers { it.setBearerAuth(token) }
+            .contentType(MediaType.MULTIPART_FORM_DATA)
+            .body(BodyInserters.fromMultipartData(builder.build()))
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+
     // Validación de Comprobante de Domicilio
     fun validarComprobanteDomicilio(file: Resource, token: String): Mono<String> {
         val builder = MultipartBodyBuilder()

@@ -54,3 +54,9 @@ data class ConsulDomResponse(
         val Mensaje: String?
     )
 }
+
+
+data class ValidaBinRequest(val validaBin: String) // 6 dígitos
+data class PolizaRequest(val poliza: String) // Usado para searchReceipts, searchLink, fareceipt
+data class CancelLinkRequest(val poliza: String, val email: String?)
+data class GenWebPayRequest(val poliza: String, val email: String, val usuccess: String, val ufail: String)
