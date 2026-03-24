@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: ws-qsalud
+  profiles:
+    active: dev
+
+server:
+  port: 5000
+
+logging:
+  level:
+    org.springframework.web.reactive.function.client.ExchangeFunctions: DEBUG

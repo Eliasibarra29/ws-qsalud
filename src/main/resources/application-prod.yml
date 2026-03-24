@@ -1,0 +1,8 @@
+qualitas:
+  api:
+    link-pago:
+
+      base-url: "https://pagos.qualitassalud.com.mx/apilink"
+    sise:
+      # URL base para los Web Services de Producción
+      base-url: "https://webservices.qualitassalud.com.mx"

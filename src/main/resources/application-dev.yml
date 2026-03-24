@@ -1,0 +1,6 @@
+qualitas:
+  api:
+    link-pago:
+      base-url: "https://pagofacturasqa.qualitassalud.com.mx/apilink"
+    sise:
+      base-url: "https://webservicesqa.qualitassalud.com.mx"
