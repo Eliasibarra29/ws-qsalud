@@ -20,147 +20,173 @@ class OperacionesController(
     private val archivoService: ArchivosService
 ) {
 
+    // Función auxiliar para limpiar el token por si el cliente envía "Bearer " al principio
+    private fun cleanToken(authHeader: String): String {
+        return authHeader.replace("Bearer ", "").trim()
+    }
 
+
+    // ==========================================
+    // 0. AUTENTICACIÓN (LOGIN)
+    // ==========================================
+
+    @GetMapping("/auth/sise")
+    fun loginSise(@RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
+        return authService.getSiseAccessToken(user, pass)
+    }
+
+    @GetMapping("/auth/pagos")
+    fun loginPagos(@RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
+        return authService.getLinkPagoToken(user, pass)
+    }
+
+
+    // ==========================================
     // 1. CATÁLOGOS
+    // ==========================================
 
     @GetMapping("/catalogos/codpos/{cp}")
-    fun getCodigoPostal(@PathVariable cp: String, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<CatalogoResponse> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> catalogosService.getCodigoPostal(cp, token) }
+    fun getCodigoPostal(@PathVariable cp: String, @RequestHeader("Authorization") authHeader: String): Mono<CatalogoResponse> {
+        return catalogosService.getCodigoPostal(cp, cleanToken(authHeader))
     }
 
     @GetMapping("/catalogos/cuestionario")
-    fun getCuestionarioMedico(@RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Flux<PreguntaCatalogo> {
-        return authService.getSiseAccessToken(user, pass).flatMapMany { token -> catalogosService.getListaCuestionarioMedico(token) }
+    fun getCuestionarioMedico(@RequestHeader("Authorization") authHeader: String): Flux<PreguntaCatalogo> {
+        return catalogosService.getListaCuestionarioMedico(cleanToken(authHeader))
     }
 
     @GetMapping("/catalogos/cuestionario/{id}")
-    fun getCuestionarioPorId(@PathVariable id: Int, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<PreguntaCatalogo> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> catalogosService.getPreguntaCuestionarioPorId(id, token) }
+    fun getCuestionarioPorId(@PathVariable id: Int, @RequestHeader("Authorization") authHeader: String): Mono<PreguntaCatalogo> {
+        return catalogosService.getPreguntaCuestionarioPorId(id, cleanToken(authHeader))
     }
 
     @GetMapping("/catalogos/ocupaciones")
-    fun getOcupaciones(@RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> catalogosService.getOcupaciones(token) }
+    fun getOcupaciones(@RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return catalogosService.getOcupaciones(cleanToken(authHeader))
     }
 
     @GetMapping("/catalogos/regimen-fiscal")
-    fun getRegimenFiscal(@RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> catalogosService.getRegimenFiscal(token) }
+    fun getRegimenFiscal(@RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return catalogosService.getRegimenFiscal(cleanToken(authHeader))
     }
 
     @GetMapping("/catalogos/parentesco")
-    fun getParentesco(@RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> catalogosService.getParentesco(token) }
+    fun getParentesco(@RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return catalogosService.getParentesco(cleanToken(authHeader))
     }
 
     @GetMapping("/catalogos/parentesco-beneficiario")
-    fun getParentescoBeneficiario(@RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> catalogosService.getParentescoBeneficiario(token) }
+    fun getParentescoBeneficiario(@RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return catalogosService.getParentescoBeneficiario(cleanToken(authHeader))
     }
 
 
-
+    // ==========================================
     // 2. OPERACIONES BROKERS (Cotizar / Emitir)
+    // ==========================================
 
     @PostMapping("/brokers/crear")
-    fun crearMovimiento(@RequestBody request: MovimientosRequest, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> brokersService.crearMovimiento(request, token) }
+    fun crearMovimiento(@RequestBody request: MovimientosRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return brokersService.crearMovimiento(request, cleanToken(authHeader))
     }
 
 
-
+    // ==========================================
     // 3. DOCUMENTOS, FIRMAS Y OTP
+    // ==========================================
 
     @PostMapping("/documentos/descargar")
-    fun descargarDocumento(@RequestBody request: FormatPrintingRequest, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<FormatPrintingResponse> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> documentosService.descargarFormato(request, token) }
+    fun descargarDocumento(@RequestBody request: FormatPrintingRequest, @RequestHeader("Authorization") authHeader: String): Mono<FormatPrintingResponse> {
+        return documentosService.descargarFormato(request, cleanToken(authHeader))
     }
 
     @PostMapping("/documentos/descargar-firmada")
-    fun descargarSolicitudFirmada(@RequestParam solicitud: String, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> documentosService.descargarSolicitudFirmada(solicitud, token) }
+    fun descargarSolicitudFirmada(@RequestParam solicitud: String, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return documentosService.descargarSolicitudFirmada(solicitud, cleanToken(authHeader))
     }
 
     @PostMapping("/otp/solicitar")
-    fun solicitarToken(@RequestBody request: TokenRequest, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> documentosService.solicitarToken(request, token) }
+    fun solicitarToken(@RequestBody request: TokenRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return documentosService.solicitarToken(request, cleanToken(authHeader))
     }
 
     @PostMapping("/otp/validar")
-    fun validarToken(@RequestBody request: VerifyTokenRequest, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> documentosService.validarToken(request, token) }
+    fun validarToken(@RequestBody request: VerifyTokenRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return documentosService.validarToken(request, cleanToken(authHeader))
     }
 
     @PostMapping("/firmas/guardar")
-    fun guardarFirma(@RequestBody request: SignatureRequest, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> documentosService.guardarFirma(request, token) }
+    fun guardarFirma(@RequestBody request: SignatureRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return documentosService.guardarFirma(request, cleanToken(authHeader))
     }
 
     @PostMapping("/cfdi/verificar")
-    fun verificarCfdi(@RequestBody request: CfdiRequest, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> documentosService.verificarCfdi(request, token) }
+    fun verificarCfdi(@RequestBody request: CfdiRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return documentosService.verificarCfdi(request, cleanToken(authHeader))
     }
 
 
-
+    // ==========================================
     // 4. ARCHIVOS  (INE, Domicilio, Video)
+    // ==========================================
 
     @PostMapping(value = ["/archivos/ine"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun subirIne(@RequestPart("file_front") fileFront: Resource, @RequestPart("file_back") fileBack: Resource, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> archivoService.validarIdentificacion(fileFront, fileBack, token) }
+    fun subirIne(@RequestPart("file_front") fileFront: Resource, @RequestPart("file_back") fileBack: Resource, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return archivoService.validarIdentificacion(fileFront, fileBack, cleanToken(authHeader))
     }
 
     @PostMapping(value = ["/archivos/domicilio"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun subirDomicilio(@RequestPart("file") file: Resource, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> archivoService.validarComprobanteDomicilio(file, token) }
+    fun subirDomicilio(@RequestPart("file") file: Resource, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return archivoService.validarComprobanteDomicilio(file, cleanToken(authHeader))
     }
 
     @PostMapping(value = ["/archivos/video"], consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
-    fun subirVideo(@RequestPart("image_front") imageFront: Resource, @RequestPart("image_back") imageBack: Resource, @RequestPart("video") video: Resource, @RequestHeader("X-Sise-User") user: String, @RequestHeader("X-Sise-Pass") pass: String): Mono<String> {
-        return authService.getSiseAccessToken(user, pass).flatMap { token -> archivoService.validarVideo(imageFront, imageBack, video, token) }
+    fun subirVideo(@RequestPart("image_front") imageFront: Resource, @RequestPart("image_back") imageBack: Resource, @RequestPart("video") video: Resource, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return archivoService.validarVideo(imageFront, imageBack, video, cleanToken(authHeader))
     }
 
 
-
+    // ==========================================
     // 5. LINK DE PAGO QSALUD
+    // ==========================================
 
     @PostMapping("/pagos/generar-link")
-    fun generarLinkPago(@RequestBody request: GenLinkRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.generarLink(request, token) }
+    fun generarLinkPago(@RequestBody request: GenLinkRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.generarLink(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/consultar-domiciliacion")
-    fun consultarDomiciliacion(@RequestBody request: ConsulDomRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.consultarDomiciliacion(request, token) }
+    fun consultarDomiciliacion(@RequestBody request: ConsulDomRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.consultarDomiciliacion(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/buscar-recibos")
-    fun buscarRecibos(@RequestBody request: PolizaRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.searchReceipts(request, token) }
+    fun buscarRecibos(@RequestBody request: PolizaRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.searchReceipts(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/valida-bin")
-    fun validaBin(@RequestBody request: ValidaBinRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.validaBin(request, token) }
+    fun validaBin(@RequestBody request: ValidaBinRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.validaBin(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/buscar-link")
-    fun searchLink(@RequestBody request: PolizaRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.searchLink(request, token) }
+    fun searchLink(@RequestBody request: PolizaRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.searchLink(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/cancelar-link")
-    fun cancelLink(@RequestBody request: CancelLinkRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.cancelLink(request, token) }
+    fun cancelLink(@RequestBody request: CancelLinkRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.cancelLink(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/webpay")
-    fun genWebPay(@RequestBody request: GenWebPayRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.genWebPay(request, token) }
+    fun genWebPay(@RequestBody request: GenWebPayRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.genWebPay(request, cleanToken(authHeader))
     }
 
     @PostMapping("/pagos/fareceipt")
-    fun fareceipt(@RequestBody request: PolizaRequest, @RequestHeader("X-Pago-User") user: String, @RequestHeader("X-Pago-Pass") pass: String): Mono<String> {
-        return authService.getLinkPagoToken(user, pass).flatMap { token -> linkPagoService.fareceipt(request, token) }
+    fun fareceipt(@RequestBody request: PolizaRequest, @RequestHeader("Authorization") authHeader: String): Mono<String> {
+        return linkPagoService.fareceipt(request, cleanToken(authHeader))
     }
 }

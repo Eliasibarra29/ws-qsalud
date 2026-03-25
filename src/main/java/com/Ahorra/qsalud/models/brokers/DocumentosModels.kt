@@ -2,9 +2,9 @@ package com.Ahorra.qsalud.models.brokers
 
 // Petición para descargar formatos (Cotización, Emisión, Solicitud)
 data class FormatPrintingRequest(
-    val cotizacion: String? = null, // 8 dígitos [cite: 751, 755]
-    val emision: String? = null, // 18 dígitos [cite: 784, 787]
-    val solicitud: String? = null // 12 dígitos [cite: 817, 820]
+    val cotizacion: String? = null, // 8 dígitos
+    val emision: String? = null, // 18 dígitos
+    val solicitud: String? = null // 12 dígitos
 )
 
 data class FormatPrintingResponse(

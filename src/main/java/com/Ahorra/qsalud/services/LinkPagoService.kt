@@ -11,7 +11,7 @@ class LinkPagoService(
 ) {
     fun generarLink(request: GenLinkRequest, token: String): Mono<String> {
         return linkPagoWebClient.post()
-            .uri("/metodo/genLink")
+            .uri("/genLink")
             .headers { it.setBearerAuth(token) }
             .bodyValue(request)
             .retrieve()
@@ -21,6 +21,13 @@ class LinkPagoService(
     fun validaBin(request: ValidaBinRequest, token: String): Mono<String> {
         return linkPagoWebClient.post().uri("/validaBin")
             .headers { it.setBearerAuth(token) }.bodyValue(request)
+            .retrieve().bodyToMono(String::class.java)
+    }
+
+
+    fun testConexion(token: String): Mono<String> {
+        return linkPagoWebClient.post().uri("/Test")
+            .headers { it.setBearerAuth(token) }
             .retrieve().bodyToMono(String::class.java)
     }
 
