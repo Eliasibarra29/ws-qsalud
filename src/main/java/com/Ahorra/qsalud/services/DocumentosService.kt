@@ -4,6 +4,7 @@ import com.Ahorra.qsalud.models.brokers.*
 import org.springframework.stereotype.Service
 import org.springframework.web.reactive.function.client.WebClient
 import reactor.core.publisher.Mono
+import java.util.Base64
 
 @Service
 class DocumentosService(
@@ -29,14 +30,20 @@ class DocumentosService(
             .bodyToMono(String::class.java)
     }
 
-    fun descargarSolicitudFirmada(solicitud: String, token: String): Mono<String> {
+
+    fun descargarSolicitudFirmada(solicitud: String, token: String): Mono<ByteArray> {
         val request = mapOf("solicitud" to solicitud)
         return siseWebClient.post()
             .uri("/api/brokers/get-siggned-application")
             .headers { it.setBearerAuth(token) }
             .bodyValue(request)
             .retrieve()
-            .bodyToMono(String::class.java)
+
+            .bodyToMono(FormatPrintingResponse::class.java)
+            .map { response ->
+
+                Base64.getDecoder().decode(response.base64 ?: "")
+            }
     }
 
     // Verificar CFDI

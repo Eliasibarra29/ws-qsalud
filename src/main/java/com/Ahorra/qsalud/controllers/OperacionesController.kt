@@ -4,7 +4,9 @@ import com.Ahorra.qsalud.models.brokers.*
 import com.Ahorra.qsalud.models.pagos.*
 import com.Ahorra.qsalud.services.*
 import org.springframework.core.io.Resource
+import org.springframework.http.HttpHeaders // Importado para las cabeceras del PDF
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity // Importado para envolver la respuesta binaria
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -100,9 +102,22 @@ class OperacionesController(
         return documentosService.descargarFormato(request, cleanToken(authHeader))
     }
 
-    @PostMapping("/documentos/descargar-firmada")
-    fun descargarSolicitudFirmada(@RequestParam solicitud: String, @RequestHeader("Authorization") authHeader: String): Mono<String> {
-        return documentosService.descargarSolicitudFirmada(solicitud, cleanToken(authHeader))
+    // MODIFICADO: Ahora devuelve ResponseEntity<ByteArray> y especifica el MediaType APPLICATION_PDF
+    @PostMapping("/documentos/descargar-firmada", produces = [MediaType.APPLICATION_PDF_VALUE])
+    fun descargarSolicitudFirmada(
+        @RequestParam solicitud: String,
+        @RequestHeader("X-Sise-User") user: String,
+        @RequestHeader("X-Sise-Pass") pass: String
+    ): Mono<ResponseEntity<ByteArray>> {
+        return authService.getSiseAccessToken(user, pass)
+            .flatMap { token -> documentosService.descargarSolicitudFirmada(solicitud, token) }
+            .map { pdfBytes ->
+                val fileName = "solicitud_$solicitud.pdf"
+                ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"$fileName\"")
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(pdfBytes)
+            }
     }
 
     @PostMapping("/otp/solicitar")

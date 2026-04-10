@@ -1,11 +1,16 @@
 package com.Ahorra.qsalud.models.auth
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.annotation.JsonProperty
+
 // --- Modelos para Link de Pago ---
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class LinkPagoAuthRequest(
-    val username: String,
-    val password: String
+    @JsonProperty("username") val username: String,
+    @JsonProperty("password") val password: String
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class LinkPagoAuthResponse(
     val code: Int?,
     val message: String?,
@@ -14,11 +19,13 @@ data class LinkPagoAuthResponse(
 )
 
 // --- Modelos para SISE (Brokers) ---
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class SiseAuthRequest(
-    val user: String,
-    val password: String
+    @JsonProperty("user") val user: String,
+    @JsonProperty("password") val password: String
 )
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 data class SiseAuthResponse(
     val message: String?,
     val usuario: String?,
