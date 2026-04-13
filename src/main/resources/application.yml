@@ -12,3 +12,10 @@ server:
 logging:
   level:
     org.springframework.web.reactive.function.client.ExchangeFunctions: INFO
+
+
+
+springdoc:
+  swagger-ui:
+    tags-sorter: alpha
+    operations-sorter: alpha # Ordena los endpoints alfabéticamente dentro de cada sección

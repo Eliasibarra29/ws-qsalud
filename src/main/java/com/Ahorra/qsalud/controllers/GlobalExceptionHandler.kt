@@ -15,7 +15,7 @@ class GlobalExceptionHandler {
      */
     @ExceptionHandler(WebClientResponseException::class)
     fun handleWebClientResponseException(ex: WebClientResponseException): Mono<ResponseEntity<String>> {
-
+        // Obtenemos el código de estado (Ej. 400 o 404) y el JSON original de Quálitas
         return Mono.just(
             ResponseEntity
                 .status(ex.statusCode)
