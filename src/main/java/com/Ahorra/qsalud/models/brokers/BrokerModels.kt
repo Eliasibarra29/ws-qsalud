@@ -3,8 +3,9 @@ package com.Ahorra.qsalud.models.brokers
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
-// --- ESTRUCTURA QUÁLITAS SISE (PARA COTIZAR/EMITIR) ---
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class MovimientosRequest(@JsonProperty("Movimientos") val movimientos: List<MovimientoWrapper>)
 
@@ -16,10 +17,12 @@ data class Movimiento(
     @JsonProperty("@TipoMovimiento") val tipoMovimiento: String,
     @JsonProperty("@NoNegocio") val noNegocio: String? = null,
     @JsonProperty("@Usuario") val usuario: String? = null,
+    @JsonProperty("@NoCotizacion") val noCotizacion: String? = null,
+    @JsonProperty("@Solicitud") val solicitud: String? = null,
     @JsonProperty("@SubRamo") val subRamo: String? = null,
-    @JsonProperty("DatosGenerales") val datosGenerales: DatosGenerales,
-    @JsonProperty("Contratante") val contratante: Contratante,
-    @JsonProperty("Asegurados") val asegurados: AseguradosWrapper
+    @JsonProperty("DatosGenerales") val datosGenerales: DatosGenerales? = null,
+    @JsonProperty("Contratante") val contratante: Contratante? = null,
+    @JsonProperty("Asegurados") val asegurados: AseguradosWrapper? = null
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -74,6 +77,8 @@ data class Asegurado(
     @JsonProperty("@Parentesco") val parentesco: String,
     @JsonProperty("@NoInciso") val noInciso: String,
     @JsonProperty("DatosAsegurado") val datosAsegurado: DatosAsegurado,
+    @JsonProperty("Beneficiarios") val beneficiarios: BeneficiariosWrapper? = null,
+    @JsonProperty("Cuestionarios") val cuestionarios: CuestionariosAsegurado? = null,
     @JsonProperty("Coberturas") val coberturas: CoberturasWrapper
 )
 
@@ -90,6 +95,38 @@ data class DatosAsegurado(
     @JsonProperty("Celular") val celular: Long,
     @JsonProperty("PaisNacimientoAsegurado") val paisNacimientoAsegurado: Int,
     @JsonProperty("OcupacionAsegurado") val ocupacionAsegurado: Int
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class BeneficiariosWrapper(@JsonProperty("Beneficiario") val beneficiarioList: List<Beneficiario>)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class Beneficiario(
+    @JsonProperty("@NoBeneficiario") val noBeneficiario: String,
+    @JsonProperty("NombreBeneficiario") val nombreBeneficiario: String,
+    @JsonProperty("ApellidoPatBeneficiario") val apellidoPatBeneficiario: String,
+    @JsonProperty("ApellidoMatBeneficiario") val apellidoMatBeneficiario: String,
+    @JsonProperty("FechaNacimientoBeneficiario") val fechaNacimientoBeneficiario: String,
+    @JsonProperty("ParentescoBeneficiario") val parentescoBeneficiario: Int,
+    @JsonProperty("GeneroBeneficiario") val generoBeneficiario: String,
+    @JsonProperty("PorcentajeBeneficiario") val porcentajeBeneficiario: Int
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class CuestionariosAsegurado(
+    @JsonProperty("CuestionarioMedico") val cuestionarioMedico: CuestionarioMedico? = null
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class CuestionarioMedico(
+    @JsonProperty("@ResultadoMed") val resultadoMed: String,
+    @JsonProperty("Pregunta") val preguntas: List<PreguntaMed>
+)
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
+data class PreguntaMed(
+    @JsonProperty("NoPreguntaMed") val noPreguntaMed: Int,
+    @JsonProperty("RespuestaMed") val respuestaMed: String
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -119,12 +156,23 @@ data class Pregunta492(
     @JsonProperty("RespuestaCon") val respuestaCon: Any
 )
 
-// --- MODELOS DE CATÁLOGO ---
+// --- CATÁLOGOS ---
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class CodPosResponse(
-    @JsonProperty("EstadoId") val estadoId: Int,
-    @JsonProperty("MunicipioId") val municipioId: Int,
-    @JsonProperty("EstadoNombre") val estadoNombre: String? = null,
-    @JsonProperty("MunicipioNombre") val municipioNombre: String? = null
+    val data: CodPosData? = null
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class CodPosData(
+    val estado: CodPosLocation? = null,
+    val alc_mcpio: CodPosLocation? = null,
+    val colonias: List<CodPosLocation>? = null
+)
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+data class CodPosLocation(
+    val id: String? = null,
+    val descripcion: String? = null
 )
 
 data class PreguntaCatalogo(
@@ -135,8 +183,11 @@ data class PreguntaCatalogo(
     val opciones: Any? = null
 )
 
-// --- REQUEST SIMPLIFICADO AHORRA ---
+// --- AHORRA REQUESTS DINÁMICOS ---
 data class CotizacionSimplificadaRequest(
+    @Schema(example = "2", description = "2=Cotizar, 7=Solicitud, 3=Emitir") val tipoMovimiento: String,
+    val folioCotizacion: String? = null, // Requerido para mov 7 y 3
+    val folioSolicitud: String? = null,  // Requerido para mov 3
     val cp: String,
     val idColonia: String,
     val rfc: String,
@@ -151,7 +202,7 @@ data class CotizacionSimplificadaRequest(
     val celular: Long,
     val ocupacion: Int,
     val asegurados: List<AseguradoSimplificado>,
-    val respuestas492: List<RespuestaSimplificada>
+    val respuestas492: List<RespuestaSimplificada>? = null
 )
 
 data class AseguradoSimplificado(
@@ -161,12 +212,30 @@ data class AseguradoSimplificado(
     val fecha_nacimiento: String,
     val sexo: String,
     val rfc: String,
-    val parentesco: Int
+    val parentesco: Int,
+    val coberturas: List<CoberturaSeleccionada>, // Las que eligió del XML
+    val beneficiarios: List<BeneficiarioSimplificado>? = null, // Requerido para mov 7
+    val respuestasMedicas: List<RespuestaSimplificada>? = null // Requerido para mov 7
+)
+
+data class CoberturaSeleccionada(
+    val noCobertura: String,
+    val sumaAsegurada: Double
+)
+
+data class BeneficiarioSimplificado(
+    val nombre: String,
+    val apellidoPaterno: String,
+    val apellidoMaterno: String,
+    val fechaNacimiento: String,
+    val genero: String,
+    val parentesco: Int,
+    val porcentaje: Int
 )
 
 data class RespuestaSimplificada(val id_pregunta: Int, val respuesta: String)
 
-// --- DOCUMENTOS, TOKEN Y FIRMAS ---
+// --- DOCUMENTOS ---
 data class FormatPrintingRequest(val solicitud: String? = null)
 data class FormatPrintingResponse(val base64: String? = null)
 data class TokenRequest(val application: String, val contact: String, val modeOtp: String)

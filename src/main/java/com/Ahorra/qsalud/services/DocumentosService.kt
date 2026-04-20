@@ -28,4 +28,40 @@ class DocumentosService(private val siseWebClient: WebClient) {
             .bodyToMono(FormatPrintingResponse::class.java)
             .map { response -> Base64.getDecoder().decode(response.base64 ?: "") }
     }
+
+    fun solicitarToken(request: TokenRequest, token: String): Mono<String> {
+        return siseWebClient.post()
+            .uri("/api/brokers/application_getToken")
+            .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+
+    fun validarToken(request: VerifyTokenRequest, token: String): Mono<String> {
+        return siseWebClient.post()
+            .uri("/api/brokers/application_verifyToken")
+            .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+
+    fun guardarFirma(request: SignatureRequest, token: String): Mono<String> {
+        return siseWebClient.post()
+            .uri("/api/brokers/signature-data")
+            .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
+
+    fun verificarCfdi(request: CfdiRequest, token: String): Mono<String> {
+        return siseWebClient.post()
+            .uri("/api/brokers/verify-cfdi")
+            .headers { it.setBearerAuth(token) }
+            .bodyValue(request)
+            .retrieve()
+            .bodyToMono(String::class.java)
+    }
 }
