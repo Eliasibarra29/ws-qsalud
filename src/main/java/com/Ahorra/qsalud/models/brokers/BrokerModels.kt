@@ -1,11 +1,11 @@
 package com.Ahorra.qsalud.models.brokers
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import io.swagger.v3.oas.annotations.media.Schema
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
-
+// --- ESTRUCTURA QUÁLITAS SISE (PARA COTIZAR/EMITIR) ---
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class MovimientosRequest(@JsonProperty("Movimientos") val movimientos: List<MovimientoWrapper>)
 
@@ -64,6 +64,11 @@ data class Contratante(
     @JsonProperty("CelularContratante") val celularContratante: Long,
     @JsonProperty("eMailContratante") val emailContratante: String,
     @JsonProperty("OcupacionContratante") val ocupacionContratante: Int,
+
+    // --- CAMPOS NUEVOS AGREGADOS ---
+    @JsonProperty("eMailFactura") val emailFactura: String? = null,
+    @JsonProperty("CPFactura") val cpFactura: String? = null,
+
     @JsonProperty("Cuestionario492") val cuestionario492: Cuestionario492? = null
 )
 
@@ -114,7 +119,8 @@ data class Beneficiario(
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class CuestionariosAsegurado(
-    @JsonProperty("CuestionarioMedico") val cuestionarioMedico: CuestionarioMedico? = null
+    @JsonProperty("CuestionarioMedico") val cuestionarioMedico: CuestionarioMedico? = null,
+    @JsonProperty("Cuestionario492Aseg") val cuestionario492Aseg: Cuestionario492? = null // --- NUEVO: 492 DE ASEGURADO ---
 )
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -156,7 +162,7 @@ data class Pregunta492(
     @JsonProperty("RespuestaCon") val respuestaCon: Any
 )
 
-// --- CATÁLOGOS ---
+//  MODELOS DE CATÁLOGO
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class CodPosResponse(
     val data: CodPosData? = null
@@ -183,11 +189,11 @@ data class PreguntaCatalogo(
     val opciones: Any? = null
 )
 
-// --- AHORRA REQUESTS DINÁMICOS ---
+//  REQUEST SIMPLIFICADO
 data class CotizacionSimplificadaRequest(
     @Schema(example = "2", description = "2=Cotizar, 7=Solicitud, 3=Emitir") val tipoMovimiento: String,
-    val folioCotizacion: String? = null, // Requerido para mov 7 y 3
-    val folioSolicitud: String? = null,  // Requerido para mov 3
+    val folioCotizacion: String? = null,
+    val folioSolicitud: String? = null,
     val cp: String,
     val idColonia: String,
     val rfc: String,
@@ -201,6 +207,10 @@ data class CotizacionSimplificadaRequest(
     val email: String,
     val celular: Long,
     val ocupacion: Int,
+    val formaPago: String, // "A", "M", "S", "T"
+    val origenRecursos: Int, // 1 al 7
+    val emailFactura: String? = null,
+    val cpFactura: String? = null,
     val asegurados: List<AseguradoSimplificado>,
     val respuestas492: List<RespuestaSimplificada>? = null
 )
@@ -213,9 +223,10 @@ data class AseguradoSimplificado(
     val sexo: String,
     val rfc: String,
     val parentesco: Int,
-    val coberturas: List<CoberturaSeleccionada>, // Las que eligió del XML
-    val beneficiarios: List<BeneficiarioSimplificado>? = null, // Requerido para mov 7
-    val respuestasMedicas: List<RespuestaSimplificada>? = null // Requerido para mov 7
+    val coberturas: List<CoberturaSeleccionada>,
+    val beneficiarios: List<BeneficiarioSimplificado>? = null,
+    val respuestasMedicas: List<RespuestaSimplificada>? = null,
+    val respuestas492Aseg: List<RespuestaSimplificada>? = null
 )
 
 data class CoberturaSeleccionada(
@@ -235,7 +246,7 @@ data class BeneficiarioSimplificado(
 
 data class RespuestaSimplificada(val id_pregunta: Int, val respuesta: String)
 
-// --- DOCUMENTOS ---
+// --- DOCUMENTOS, TOKEN Y FIRMAS ---
 data class FormatPrintingRequest(val solicitud: String? = null)
 data class FormatPrintingResponse(val base64: String? = null)
 data class TokenRequest(val application: String, val contact: String, val modeOtp: String)
